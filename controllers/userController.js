@@ -1,9 +1,11 @@
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const cookie = require("cookie");
+require("dotenv").config();
 // secret
 const bcryptSalt = bcrypt.genSaltSync(10);
-const jwtSecret = require("crypto").randomBytes(64).toString("hex");
+const jwtSecret = "dslkfjsdfsdlfjslkdafhakfjsd23423jlkksdf";
 
 const userRegister = async (req, res) => {
   const { name, email, password } = req.body;
@@ -16,42 +18,56 @@ const userRegister = async (req, res) => {
   // save user to the database
   try {
     const savedUser = await newUser.save();
-    res.send(savedUser);
-    console.log("User saved successfully:", savedUser);
+    res.json(savedUser);
+    console.log("User saved successfully:");
   } catch (err) {
-    res.send("error while register");
+    res.json("error while register");
     console.error("Error saving user:", err);
   }
 };
 
 const userLogin = async (req, res) => {
   const { email, password } = req.body;
-  try {
-    const userDoc = await User.findOne({ email });
-    if (userDoc) {
-      const passwordCheck = bcrypt.compareSync(password, userDoc.password);
-      if (passwordCheck) {
-        jwt.sign(
-          { email: userDoc.email, id: userDoc._id },
-          jwtSecret,
-          {},
-          (error, token) => {
-            if (error) throw error;
-            res.cookie("token", token).status(200).send(true);
-          }
-        );
-      } else {
-        res.send(false);
-      }
+  const userDoc = await User.findOne({ email });
+  if (userDoc) {
+    const passOk = bcrypt.compareSync(password, userDoc.password);
+    if (passOk) {
+      jwt.sign(
+        { email: userDoc.email, id: userDoc._id, name: userDoc.name },
+        jwtSecret,
+        {},
+        (error, token) => {
+          if (error) throw error;
+          res.cookie("token", token).status(200).json(userDoc);
+        }
+      );
     } else {
-      res.send(false);
+      res.status(422).json("password not ok");
     }
-  } catch (error) {
-    console.log("error while user login in server");
+  } else {
+    res.json("user not found");
   }
 };
 
+const userProfile = async (req, res) => {
+  const { token } = req.cookies;
+  if (token) {
+    jwt.verify(token, jwtSecret, {}, async (err, user) => {
+      if (err) throw err;
+      const userDoc = await User.findById(user.id);
+      res.json(userDoc);
+    });
+  } else {
+    res.json("token not found!");
+  }
+};
+
+const userLogout = async (req, res) => {
+  res.json(true);
+};
 module.exports = {
   userRegister,
   userLogin,
+  userProfile,
+  userLogout,
 };
