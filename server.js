@@ -15,7 +15,7 @@ const { connectMongoDb } = require("./connection");
 // routes path
 const userRoutes = require("./routes/userRoutes");
 const uploadRoutes = require("./routes/uploadRoutes");
-const pageRoutes = require("./routes/pageRoutes");
+const placeRoutes = require("./routes/placeRoutes");
 
 // middleware
 app.use(
@@ -37,8 +37,8 @@ app.use("/user", userRoutes);
 // upload routes
 app.use("/upload", uploadRoutes);
 
-// new page create or update routes
-app.use("/page", pageRoutes);
+// places routes
+app.use("/place", placeRoutes);
 
 // Database connection
 connectMongoDb("mongodb://localhost:27017").then(() => {

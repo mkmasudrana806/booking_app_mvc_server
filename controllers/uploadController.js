@@ -16,7 +16,6 @@ const uploadPhotoByLink = async (req, res) => {
   await imageDownloader
     .image(options)
     .then(({ filepath }) => {
-      console.log("file path: " + filepath);
       res.json(filename);
     })
     .catch((err) => console.error("Erro", err));
@@ -32,19 +31,16 @@ const photosMiddleware = multer({
 
 const uploadPhotoFromLocal = async (req, res) => {
   const files = req.files;
-  console.log(files);
   const uploadedFiles = [];
   for (let i = 0; i < files.length; i++) {
     const { path, filename, originalname } = files[i];
     // const parts = originalname.split(".");
     const ext = pathModule.extname(originalname); // pathmodule method from path module
-    console.log("extension using method", ext);
     // const ext = parts[parts.length - 1];
     const newPath = path + ext; // Concatenate the path and extension
     fs.renameSync(path, newPath);
     uploadedFiles.push(filename + ext);
   }
-  console.log("Uploaded files: " + uploadedFiles);
   res.json(uploadedFiles);
 };
 // const uploadPhotoFromLocal = async (req, res) => {

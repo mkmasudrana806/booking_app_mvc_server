@@ -19,7 +19,6 @@ const userRegister = async (req, res) => {
   try {
     const savedUser = await newUser.save();
     res.json(savedUser);
-    console.log("User saved successfully:");
   } catch (err) {
     res.json("error while register");
     console.error("Error saving user:", err);
